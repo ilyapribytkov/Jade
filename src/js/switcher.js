@@ -1,32 +1,56 @@
+// GTM
+let sectionStartTime = Date.now()
+let currentSectionName = "expense"
+
 const { tabs, mainContainer } = elementDOM_var
 
-tabs.forEach(tab => tab.addEventListener('click', switchActiveTab))
+tabs.forEach((tab) => tab.addEventListener("click", switchActiveTab))
 
 // Switcher
 function switchActiveTab() {
-  if (this.closest('.tab-button_active')) return
+  if (this.closest(".tab-button_active")) return
+
+  // --- НАЧАЛО БЛОКА АНАЛИТИКИ ---
+  // Определяем название новой секции из ID кнопки (убираем приставку 'tab-button-')
+  const nextSectionName = this.id.replace("tab-button-", "")
+
+  // Считаем, сколько секунд пробыли в ПРЕДЫДУЩЕЙ секции
+  const duration = Math.round((Date.now() - sectionStartTime) / 1000)
+
+  window.dataLayer = window.dataLayer || []
+  window.dataLayer.push({
+    event: "virtual_pageview",
+    page_path: "/" + nextSectionName,
+    previous_section_name: currentSectionName,
+    previous_section_duration: duration,
+  })
+
+  // Обновляем данные для следующего клика
+  sectionStartTime = Date.now()
+  currentSectionName = nextSectionName
+  // --- КОНЕЦ БЛОКА АНАЛИТИКИ ---
 
   const activeTabSection = document.querySelector('[data-active="active-tab"]')
-  const activeTabButton = document.querySelector('.tab-button_active')
-  const addActive = () => this.classList.add('tab-button_active')
+  const activeTabButton = document.querySelector(".tab-button_active")
+  const addActive = () => this.classList.add("tab-button_active")
 
   switch (this.id) {
-    case 'tab-button-expense':
+    case "tab-button-expense":
       addActive()
       renderExpense()
       break
-    case 'tab-button-convert':
+    case "tab-button-convert":
       addActive()
       renderConvert()
       break
-    case 'tab-button-home':
+    case "tab-button-home":
       addActive()
       renderHome()
       break
   }
 
   activeTabSection ? activeTabSection.remove() : null
-  activeTabButton.classList.remove('tab-button_active')
+  activeTabButton.classList.remove("tab-button_active")
 }
 
 // Render Expense
@@ -48,7 +72,7 @@ function renderExpense() {
       </div>
     </div>
   `
-  mainContainer.insertAdjacentHTML('afterbegin', expenseHTML)
+  mainContainer.insertAdjacentHTML("afterbegin", expenseHTML)
   if (dataNote.length > 0) renderExpenseField(dataNote)
 }
 
@@ -99,7 +123,7 @@ function renderConvert() {
       </div>
     </div>
   `
-  mainContainer.insertAdjacentHTML('afterbegin', convertHTML)
+  mainContainer.insertAdjacentHTML("afterbegin", convertHTML)
   startConvert()
 }
 
