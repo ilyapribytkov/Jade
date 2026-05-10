@@ -1,5 +1,14 @@
 // Variables
-const { store, fromSelect, toSelect, inputValue, convertForm, convertValue, convertCurrency, switchButton } = convert_var
+const {
+  store,
+  fromSelect,
+  toSelect,
+  inputValue,
+  convertForm,
+  convertValue,
+  convertCurrency,
+  switchButton,
+} = convert_var
 
 // Store
 const { url } = store
@@ -12,7 +21,9 @@ async function getCurrency() {
     const data = await response.json()
     return data.supported_codes
   } catch (err) {
-    console.log(`Пожалуйста, проверьте подключение к интеренету или ожидайте ответа от сервера.\nВ текущий момент данные валют не могут быть получены\n${err}`)
+    console.log(
+      `Пожалуйста, проверьте подключение к интеренету или ожидайте ответа от сервера.\nВ текущий момент данные валют не могут быть получены\n${err}`,
+    )
   }
 }
 
@@ -22,9 +33,24 @@ async function sendRequest(e) {
     const response = await fetch(`${url}/pair/${from}/${to}/${amount}`)
     const data = await response.json()
 
+    // --- GTM: Успешная конвертация ---
+    window.dataLayer = window.dataLayer || []
+    window.dataLayer.push({
+      event: "currency_conversion",
+      conversion_data: {
+        from_currency: from,
+        to_currency: to,
+        amount: amount,
+        result_value: data.conversion_result, // на всякий случай сохраним и результат
+      },
+    })
+    // --------------------------------
+
     renderConversionResult(data)
   } catch (err) {
-    console.log(`Какие-то неполадки при запросе данных с сервера. Пока налейте чашечку чая и передохните, все будет хорошо\n${err}`)
+    console.log(
+      `Какие-то неполадки при запросе данных с сервера. Пока налейте чашечку чая и передохните, все будет хорошо\n${err}`,
+    )
   }
 }
 
@@ -37,11 +63,11 @@ const handleInputValue = ({ target }) => (amount = target.value)
 async function renderOptionHTML() {
   const data = await getCurrency()
 
-  data.forEach(currency => {
+  data.forEach((currency) => {
     const option = `<option value="${currency[0]}">${currency[0]}</option>`
 
-    fromSelect().insertAdjacentHTML('beforeend', option)
-    toSelect().insertAdjacentHTML('beforeend', option)
+    fromSelect().insertAdjacentHTML("beforeend", option)
+    toSelect().insertAdjacentHTML("beforeend", option)
   })
 }
 
@@ -65,9 +91,9 @@ function startConvert() {
   renderOptionHTML()
 
   // Events
-  fromSelect().addEventListener('change', handleFromSelect)
-  toSelect().addEventListener('change', handleToSelect)
-  inputValue().addEventListener('input', handleInputValue)
-  convertForm().addEventListener('submit', sendRequest)
-  switchButton().addEventListener('click', switchCurrency)
+  fromSelect().addEventListener("change", handleFromSelect)
+  toSelect().addEventListener("change", handleToSelect)
+  inputValue().addEventListener("input", handleInputValue)
+  convertForm().addEventListener("submit", sendRequest)
+  switchButton().addEventListener("click", switchCurrency)
 }
